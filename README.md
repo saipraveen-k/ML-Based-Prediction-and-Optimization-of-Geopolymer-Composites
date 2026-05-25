@@ -85,31 +85,45 @@ This project implements a complete Machine Learning pipeline for predicting the 
 The system uses the following material composition and curing parameters as input features:
 
 **Binders:**
-- GGBS (Ground Granulated Blast Furnace Slag)
-- Silica Fume
-- Fly Ash
-- Rice Husk Ash
+- Cement_kg_m3
+- Fly_Ash_kg_m3
+- Silica_Fume_kg_m3
+- Metakaolin_kg_m3
+- GGBS_kg_m3
+- RHA_kg_m3 (Rice Husk Ash)
+- POFA_kg_m3
+
+**Aggregates & Water:**
+- Fine_Sand_kg_m3
+- Water_kg_m3
+- Extra_Water_kg_m3
+- Water_Binder_Ratio
 
 **Alkali Activators:**
-- NaOH (Sodium Hydroxide)
-- Na2SiO3 (Sodium Silicate)
-- KOH (Potassium Hydroxide)
-- Extra Water
+- Na2SiO3_Content_kg_m3
+- NaOH_Content_kg_m3
+- KOH_Content_kg_m3
+- Activator_Molarity_M
 
-**Fibers & Parameters:**
-- Steel Fiber
-- PP Fiber (Polypropylene Fiber)
-- Liquid/Binder Ratio
-- Curing Temperature
+**Additives & Fibers:**
+- Superplasticizer_kg_m3
+- Polypropylene_Fiber_Content_%
+- PP_Fiber_kg_m3
+- Fiber_Length_mm
+
+**Curing Parameters:**
+- Curing_Temperature_C
+- Curing_Duration_days
 
 ### Target Variable
-- **CS (Compressive Strength)** - Measured in MPa
+- **Compressive_Strength_MPa** - Measured in MPa
 
 ### Dataset Requirements
-- Format: Excel (.xlsx) or CSV
+- Format: CSV (.csv)
 - No missing values (handled automatically if present)
 - Numerical values for all features
 - Minimum 50 samples for reliable training
+- Target column: Compressive_Strength_MPa
 
 ---
 
@@ -170,8 +184,8 @@ pip install -r requirements.txt
 ```
 
 ### Step 4: Place Dataset
-- Place your Excel dataset file named `dataset.xlsx` in the `data/` folder
-- Ensure the dataset contains the required features and target variable
+- Place your CSV dataset file named `dataset.csv` in the `data/` folder
+- Ensure the dataset contains the required features and target variable (Compressive_Strength_MPa)
 
 ---
 
@@ -187,7 +201,8 @@ jupyter notebook notebooks/main.ipynb
 2. **Run All Cells**
 - Execute cells sequentially from top to bottom
 - The notebook will automatically:
-  - Load and preprocess data
+  - Load CSV dataset
+  - Preprocess data
   - Perform EDA
   - Train models
   - Evaluate performance
@@ -241,7 +256,7 @@ prediction = predictor.predict_single(input_dict, 'XGBoost')
 project/
 │
 ├── data/
-│   └── dataset.xlsx              # Your dataset file
+│   └── dataset.csv               # Your dataset file (CSV format)
 │
 ├── notebooks/
 │   └── main.ipynb                # Complete Jupyter notebook

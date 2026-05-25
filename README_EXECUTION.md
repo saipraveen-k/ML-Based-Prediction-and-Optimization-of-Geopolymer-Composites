@@ -167,23 +167,28 @@ python -c "import pandas, numpy, sklearn, xgboost, streamlit; print('All package
 
 ```bash
 # Place your dataset file here:
-data/dataset.xlsx
+data/dataset.csv
 ```
 
 ### Step 3: Verify Dataset Format
 
 Your dataset should have columns similar to:
-- GGBS, Silica Fume, Fly Ash, Rice Husk Ash
-- NaOH, Na2SiO3, KOH, Extra Water
-- Steel Fiber, PP Fiber
-- Liquid/Binder Ratio, Curing Temperature
-- CS (Compressive Strength) - **This is the target variable**
+- Cement_kg_m3, Fly_Ash_kg_m3, Silica_Fume_kg_m3, Metakaolin_kg_m3
+- GGBS_kg_m3, RHA_kg_m3, POFA_kg_m3
+- Fine_Sand_kg_m3, Water_kg_m3, Extra_Water_kg_m3
+- Water_Binder_Ratio
+- Na2SiO3_Content_kg_m3, NaOH_Content_kg_m3, KOH_Content_kg_m3
+- Activator_Molarity_M
+- Superplasticizer_kg_m3
+- Polypropylene_Fiber_Content_%, PP_Fiber_kg_m3, Fiber_Length_mm
+- Curing_Temperature_C, Curing_Duration_days
+- Compressive_Strength_MPa - **This is the target variable**
 
 ### Step 4: Check Dataset
 
 ```python
 import pandas as pd
-df = pd.read_excel('data/dataset.xlsx')
+df = pd.read_csv('data/dataset.csv')
 print(df.head())
 print(df.shape)
 print(df.columns)
@@ -427,12 +432,12 @@ pip install xgboost --no-cache-dir
 
 ### Issue 5: Dataset Not Found
 
-**Error:** FileNotFoundError: dataset.xlsx not found
+**Error:** FileNotFoundError: dataset.csv not found
 
 **Solution:**
 - Ensure dataset is placed in `data/` folder
 - Check filename spelling (case-sensitive on Linux/macOS)
-- Verify file format (.xlsx or .csv)
+- Verify file format (.csv)
 
 ### Issue 6: Memory Error During Training
 
@@ -501,8 +506,8 @@ Before running the project, ensure:
 - [ ] Python 3.8+ is installed
 - [ ] Virtual environment is created and activated
 - [ ] All dependencies are installed (`pip install -r requirements.txt`)
-- [ ] Dataset is placed in `data/dataset.xlsx`
-- [ ] Dataset has correct format and columns
+- [ ] Dataset is placed in `data/dataset.csv`
+- [ ] Dataset has correct format and columns (Compressive_Strength_MPa as target)
 - [ ] Sufficient disk space (2 GB+)
 - [ ] Sufficient RAM (8 GB+ recommended)
 
