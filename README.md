@@ -38,6 +38,7 @@ This project implements a complete Machine Learning pipeline for predicting the 
 - ✅ Detailed model evaluation and comparison
 - ✅ Feature importance analysis
 - ✅ 100-run Monte Carlo simulation for stability analysis
+- ✅ Explainable AI (XAI) with publication-ready SHAP analysis (beeswarm, summary, bar, waterfall, and interactive force plots)
 - ✅ Professional Streamlit web application
 - ✅ Complete documentation and reports
 
@@ -332,7 +333,6 @@ project/
 5. **Cost Analysis:** Include cost prediction and optimization
 6. **Database Integration:** Store predictions and track performance over time
 7. **Multi-output Prediction:** Predict additional properties (durability, workability)
-8. **Explainable AI:** Implement SHAP values for model interpretation
 
 ---
 

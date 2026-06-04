@@ -16,12 +16,13 @@
 8. [EDA Explanation](#eda-explanation)
 9. [Feature Importance Explanation](#feature-importance-explanation)
 10. [Monte Carlo Simulation Explanation](#monte-carlo-simulation-explanation)
-11. [Evaluation Metrics Explanation](#evaluation-metrics-explanation)
-12. [Results Interpretation](#results-interpretation)
-13. [Applications](#applications)
-14. [Advantages](#advantages)
-15. [Future Scope](#future-scope)
-16. [Conclusion](#conclusion)
+11. [Explainable AI (SHAP) Explanation](#explainable-ai-shap-explanation)
+12. [Evaluation Metrics Explanation](#evaluation-metrics-explanation)
+13. [Results Interpretation](#results-interpretation)
+14. [Applications](#applications)
+15. [Advantages](#advantages)
+16. [Future Scope](#future-scope)
+17. [Conclusion](#conclusion)
 
 ---
 
@@ -451,7 +452,33 @@ Monte Carlo simulation assesses model stability by repeatedly training and evalu
 
 ---
 
-## 11. Evaluation Metrics Explanation
+## 11. Explainable AI (SHAP) Explanation
+
+### 11.1 Purpose
+Explainable AI (XAI) using SHAP (SHapley Additive exPlanations) resolves the "black box" nature of complex machine learning models (like XGBoost). It provides mathematically rigorous explanations of both global model behavior and local mix-specific predictions based on cooperative game theory.
+
+### 11.2 Key Concepts
+- **SHAP Value:** The average marginal contribution of a feature to the prediction across all possible coalitions of features.
+- **Base Value:** The expected value of the model's output over the dataset (mean prediction, approximately 50 MPa).
+- **Attribution Direction:** A positive SHAP value pulls the prediction higher than the base value, while a negative value pulls it lower.
+
+### 11.3 Visualizations Generated
+- **Beeswarm Plot:** Shows the distribution of impacts for each feature. Features are ranked by importance, and dots represent individual mix samples colored by feature values (red for high, blue for low).
+- **Summary Plot:** Displays the global feature importance rankings alongside the direction of influence.
+- **Bar Plot:** Ranks features by their mean absolute SHAP value, showing the average magnitude of influence.
+- **Dependence Plots:** Explore non-linear relationships and interaction effects between primary features (like Silica Fume and water content) and automatically selected interaction features.
+- **Waterfall Plot:** Explains individual mix designs by displaying the step-by-step contribution of each material from the base value to the final prediction.
+- **Force Plot:** An interactive visualization displaying the balancing forces of strength-increasing and strength-reducing materials.
+
+### 11.4 Engineering Interpretation
+- **Silica Fume:** Promotes geopolymerization and density, showing a strong positive SHAP impact.
+- **PP Fibers:** Act as bridges to control tensile crack propagation, showing a positive impact up to a volume fraction of 1.2%, after which the impact plateaus.
+- **Water Content:** Shows a severe negative SHAP impact, as excess water creates capillary pores that weaken the geopolymer binder matrix.
+- **Curing Temperature:** Acts as a reaction threshold; heat curing (60°C to 80°C) is required to activate polymerization, showing positive SHAP values compared to ambient curing.
+
+---
+
+## 12. Evaluation Metrics Explanation
 
 ### 11.1 R² Score (Coefficient of Determination)
 
@@ -518,7 +545,7 @@ Monte Carlo simulation assesses model stability by repeatedly training and evalu
 
 ---
 
-## 12. Results Interpretation
+## 13. Results Interpretation
 
 ### 12.1 Model Performance
 
@@ -557,7 +584,7 @@ Monte Carlo simulation assesses model stability by repeatedly training and evalu
 
 ---
 
-## 13. Applications
+## 14. Applications
 
 ### 13.1 Research Applications
 - **Mix Design Optimization:** Find optimal proportions without extensive testing
@@ -579,7 +606,7 @@ Monte Carlo simulation assesses model stability by repeatedly training and evalu
 
 ---
 
-## 14. Advantages
+## 15. Advantages
 
 ### 14.1 Technical Advantages
 1. **High Accuracy:** Achieves R² > 0.80, comparable to experimental results
@@ -604,7 +631,7 @@ Monte Carlo simulation assesses model stability by repeatedly training and evalu
 
 ---
 
-## 15. Future Scope
+## 16. Future Scope
 
 ### 15.1 Model Enhancements
 1. **Neural Networks:** Implement deep learning models
@@ -634,7 +661,6 @@ Monte Carlo simulation assesses model stability by repeatedly training and evalu
 1. **Multi-output Prediction:** Predict durability, workability, etc.
 2. **Time-Series:** Predict strength over curing time
 3. **Uncertainty Quantification:** Provide prediction intervals
-4. **Explainable AI:** SHAP values for model interpretation
 
 ### 15.6 Data Integration
 1. **Database:** Store predictions and track performance
@@ -644,7 +670,7 @@ Monte Carlo simulation assesses model stability by repeatedly training and evalu
 
 ---
 
-## 16. Conclusion
+## 17. Conclusion
 
 This project successfully implements a comprehensive Machine Learning system for predicting the compressive strength of Ultra-High-Performance Geopolymer Concrete. The system demonstrates:
 
