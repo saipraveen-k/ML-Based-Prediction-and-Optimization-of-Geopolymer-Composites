@@ -399,7 +399,7 @@ class MonteCarloSimulation:
         
         # Save report
         output_path = os.path.join(self.output_dir, 'reports', f'monte_carlo_report_{get_timestamp()}.txt')
-        with open(output_path, 'w') as f:
+        with open(output_path, 'w', encoding='utf-8') as f:
             f.write(report)
         print(f"Monte Carlo report saved to: {output_path}")
         

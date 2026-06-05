@@ -456,7 +456,7 @@ class SHAPAnalyzer:
         
         # Save report
         output_path = os.path.join(self.shap_dir, 'Explainable_AI_Analysis.md')
-        with open(output_path, 'w') as f:
+        with open(output_path, 'w', encoding='utf-8') as f:
             f.write(report_markdown)
         print(f"Scientific report section saved to: {output_path}")
         

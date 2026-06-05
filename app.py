@@ -163,7 +163,11 @@ def main():
     st.sidebar.markdown("---")
     
     # Initialize tabs
-    tab1, tab2 = st.tabs(["🔮 Predict Compressive Strength", "📊 Explainable AI (SHAP) Analysis"])
+    tab1, tab2, tab3 = st.tabs([
+        "🔮 Predict Compressive Strength", 
+        "📊 Validation Analytics", 
+        "🌍 Explainable AI (SHAP) Analysis"
+    ])
     
     # Collect inputs (needs to be available outside the tab so both tabs can access)
     input_values = {}
@@ -325,6 +329,141 @@ def main():
             """)
             
     with tab2:
+        st.markdown('<h2 class="sub-header">📊 Model Validation & Performance Analytics</h2>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="info-box"><strong>Rigorous Validation Framework:</strong> In machine learning, validation '
+            'is critical to ensure generalization and guard against overfitting. This section presents '
+            'the comparative validation results. <strong>Monte Carlo simulation</strong> was adopted as the primary '
+            'robustness verification framework (100 random splits), while <strong>10-fold cross-validation</strong> '
+            'was employed as an additional generalization assessment.</div>',
+            unsafe_allow_html=True
+        )
+        
+        # Sub-tabs within Validation Analytics
+        sub_tab1, sub_tab2, sub_tab3, sub_tab4 = st.tabs([
+            "📊 Methodology Comparison",
+            "🎲 Monte Carlo Simulation",
+            "🏁 10-Fold Cross Validation",
+            "📝 Scientific Report"
+        ])
+        
+        with sub_tab1:
+            st.markdown("### Primary vs. Secondary Validation Comparison")
+            st.markdown(
+                "Comparing the performance metrics obtained via Monte Carlo (100 runs) and 10-Fold Cross-Validation "
+                "verifies model stability. A close alignment between both methods highlights excellent generalization."
+            )
+            
+            comp_path = 'outputs/cross_validation/validation_comparison.csv'
+            if os.path.exists(comp_path):
+                comp_df = pd.read_csv(comp_path)
+                st.dataframe(comp_df, use_container_width=True, hide_index=True)
+                
+                # Visual comparison of R2 and MAE across models
+                st.markdown("#### Validation Consistency Visualizer")
+                fig, ax = plt.subplots(figsize=(10, 5))
+                # filter to mean metrics
+                mean_metrics = comp_df[comp_df['Metric'].str.contains('Mean')]
+                
+                # Plot using seaborn
+                sns.barplot(x='Metric', y='10-Fold CV', hue='Model', data=mean_metrics, ax=ax, palette='muted')
+                ax.set_title("10-Fold Cross-Validation Mean Performance")
+                ax.set_ylabel("Metric Value")
+                ax.grid(True, alpha=0.3)
+                st.pyplot(fig)
+                plt.close()
+            else:
+                st.warning("Validation comparison table not found. Please run the validation script first.")
+                
+        with sub_tab2:
+            st.markdown("### Monte Carlo Robustness Analysis (Primary)")
+            st.markdown(
+                "Monte Carlo simulation randomly splits the dataset 100 times to construct probability distributions "
+                "for each metric. This validates model resistance to dataset variance."
+            )
+            
+            # Search for latest Monte Carlo report
+            import glob
+            mc_reports = glob.glob('outputs/reports/monte_carlo_report_*.txt')
+            if mc_reports:
+                mc_reports.sort()
+                latest_mc = mc_reports[-1]
+                with open(latest_mc, 'r', encoding='utf-8', errors='replace') as f:
+                    mc_text = f.read()
+                st.text_area("Latest Monte Carlo Simulation Report", mc_text, height=350)
+            else:
+                st.warning("No Monte Carlo report files found in outputs/reports/")
+                
+            # If Monte Carlo density plots exist, display them
+            st.markdown("#### Monte Carlo Density Distributions")
+            mc_graphs = glob.glob('outputs/graphs/monte_carlo_pdf_r2_scores_XGBoost_*.png')
+            if mc_graphs:
+                mc_graphs.sort()
+                st.image(mc_graphs[-1], caption="Probability Density Function (PDF) of XGBoost R² over 100 Monte Carlo splits", use_column_width=True)
+            else:
+                st.info("Run Monte Carlo scripts to see distribution plots here.")
+                
+        with sub_tab3:
+            st.markdown("### 10-Fold Cross-Validation (Generalization Assessment)")
+            st.markdown(
+                "In 10-fold cross-validation, the dataset is partitioned into 10 subsets. Each subset is used as testing "
+                "data once while the model is trained on the remaining 9 subsets. This guarantees every sample is tested."
+            )
+            
+            cv_summary_path = 'outputs/cross_validation/cv_summary.csv'
+            if os.path.exists(cv_summary_path):
+                cv_summary = pd.read_csv(cv_summary_path)
+                st.dataframe(cv_summary, use_container_width=True, hide_index=True)
+                
+                col_box1, col_box2 = st.columns(2)
+                with col_box1:
+                    r2_box = 'outputs/cross_validation/r2_boxplot.png'
+                    if os.path.exists(r2_box):
+                        st.image(r2_box, caption="Figure 1: R² score distribution across folds", use_column_width=True)
+                    mae_box = 'outputs/cross_validation/mae_boxplot.png'
+                    if os.path.exists(mae_box):
+                        st.image(mae_box, caption="Figure 2: MAE distribution across folds", use_column_width=True)
+                with col_box2:
+                    rmse_box = 'outputs/cross_validation/rmse_boxplot.png'
+                    if os.path.exists(rmse_box):
+                        st.image(rmse_box, caption="Figure 3: RMSE distribution across folds", use_column_width=True)
+                    model_comp_img = 'outputs/cross_validation/model_comparison.png'
+                    if os.path.exists(model_comp_img):
+                        st.image(model_comp_img, caption="Figure 4: Model metric comparison (Mean ± SD)", use_column_width=True)
+                        
+                # Add outlier/stability flags
+                st.markdown("#### 🔍 Stability Verification & Outlier Check")
+                report_path = 'outputs/cross_validation/Cross_Validation_Report.md'
+                if os.path.exists(report_path):
+                    with open(report_path, 'r', encoding='utf-8', errors='replace') as f:
+                        lines = f.readlines()
+                    stability_lines = []
+                    in_stability_sec = False
+                    for line in lines:
+                        if "## 4. Stability and Consistency Assessment" in line:
+                            in_stability_sec = True
+                            continue
+                        elif "## 5." in line:
+                            in_stability_sec = False
+                            break
+                        if in_stability_sec:
+                            stability_lines.append(line)
+                    if stability_lines:
+                        st.code("".join(stability_lines).strip(), language="text")
+            else:
+                st.warning("10-Fold CV results not found. Run validation script first.")
+                
+        with sub_tab4:
+            st.markdown("### 📝 Scientific Report (Cross-Validation)")
+            report_path = 'outputs/cross_validation/Cross_Validation_Report.md'
+            if os.path.exists(report_path):
+                with open(report_path, 'r', encoding='utf-8', errors='replace') as f:
+                    report_content = f.read()
+                st.markdown(report_content)
+            else:
+                st.warning("Cross validation report not found.")
+
+    with tab3:
         st.markdown('<h2 class="sub-header">📊 Explainable AI (SHAP) Analysis</h2>', unsafe_allow_html=True)
         st.markdown(
             '<div class="info-box"><strong>What is SHAP?</strong> SHAP (SHapley Additive exPlanations) is a '
@@ -366,7 +505,7 @@ def main():
             st.markdown("### 📝 Scientific Interpretation (Paper-Ready)")
             report_path = 'outputs/shap/Explainable_AI_Analysis.md'
             if os.path.exists(report_path):
-                with open(report_path, 'r', encoding='utf-8') as f:
+                with open(report_path, 'r', encoding='utf-8', errors='replace') as f:
                     report_md = f.read()
                 st.markdown(report_md)
             else:
