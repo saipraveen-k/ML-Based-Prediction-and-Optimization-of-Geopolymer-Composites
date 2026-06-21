@@ -208,7 +208,9 @@ class SHAPAnalyzer:
         plt.figure(figsize=(12, 8))
         
         # Bar plot using the Explanation object
-        shap.plots.bar(self.explanation, max_display=len(self.feature_names), plot_size=(12, 8), show=False)
+        # Note: shap.plots.bar does not accept plot_size in some versions, so we set it on the figure beforehand
+        shap.plots.bar(self.explanation, max_display=len(self.feature_names), show=False)
+        plt.gcf().set_size_inches(12, 8)
         
         plt.title('Global Feature Importance (Mean Absolute SHAP Value)', fontsize=20, fontweight='bold', pad=15)
         plt.xlabel('mean(|SHAP value|) (Average Impact magnitude, MPa)', fontsize=16)
