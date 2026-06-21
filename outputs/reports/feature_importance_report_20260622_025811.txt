@@ -1,0 +1,86 @@
+================================================================================
+                       FEATURE IMPORTANCE ANALYSIS REPORT                       
+================================================================================
+
+Generated on: 20260622_025811
+
+================================================================================
+
+Random Forest:
+--------------------------------------------------------------------------------
+
+Top 10 Most Important Features:
+ 1. Silica_Fume_kg_m3             : 0.1818
+ 2. Superplasticizer_kg_m3        : 0.1105
+ 3. Water_kg_m3                   : 0.1034
+ 4. PP_Fiber_kg_m3                : 0.0888
+ 5. Curing_Temperature_C          : 0.0861
+ 6. Water_Binder_Ratio            : 0.0841
+ 7. Polypropylene_Fiber_Content_% : 0.0825
+ 8. Curing_Duration_days          : 0.0812
+ 9. Fine_Sand_kg_m3               : 0.0373
+10. Extra_Water_kg_m3             : 0.0312
+
+Bottom 5 Least Important Features:
+ 1. NaOH_Content_kg_m3            : 0.0069
+ 2. Metakaolin_kg_m3              : 0.0062
+ 3. RHA_kg_m3                     : 0.0030
+ 4. POFA_kg_m3                    : 0.0012
+ 5. KOH_Content_kg_m3             : 0.0000
+
+SVR:
+--------------------------------------------------------------------------------
+
+Top 10 Most Important Features:
+ 1. Superplasticizer_kg_m3        : 0.4277
+ 2. NaOH_Content_kg_m3            : 0.3689
+ 3. Na2SiO3_Content_kg_m3         : 0.2205
+ 4. Water_kg_m3                   : 0.0768
+ 5. PP_Fiber_kg_m3                : 0.0623
+ 6. Extra_Water_kg_m3             : 0.0515
+ 7. Cement_kg_m3                  : 0.0343
+ 8. Polypropylene_Fiber_Content_% : 0.0328
+ 9. Water_Binder_Ratio            : 0.0301
+10. Curing_Temperature_C          : 0.0281
+
+Bottom 5 Least Important Features:
+ 1. Metakaolin_kg_m3              : 0.0092
+ 2. POFA_kg_m3                    : 0.0075
+ 3. Curing_Duration_days          : 0.0065
+ 4. GGBS_kg_m3                    : 0.0056
+ 5. KOH_Content_kg_m3             : 0.0000
+
+XGBoost:
+--------------------------------------------------------------------------------
+
+Top 10 Most Important Features:
+ 1. Silica_Fume_kg_m3             : 0.2354
+ 2. PP_Fiber_kg_m3                : 0.1979
+ 3. Curing_Temperature_C          : 0.1312
+ 4. Polypropylene_Fiber_Content_% : 0.0829
+ 5. Water_Binder_Ratio            : 0.0776
+ 6. Extra_Water_kg_m3             : 0.0664
+ 7. Superplasticizer_kg_m3        : 0.0457
+ 8. Water_kg_m3                   : 0.0399
+ 9. Curing_Duration_days          : 0.0343
+10. Activator_Molarity_M          : 0.0173
+
+Bottom 5 Least Important Features:
+ 1. Fly_Ash_kg_m3                 : 0.0051
+ 2. Metakaolin_kg_m3              : 0.0040
+ 3. RHA_kg_m3                     : 0.0023
+ 4. POFA_kg_m3                    : 0.0020
+ 5. KOH_Content_kg_m3             : 0.0000
+
+================================================================================
+
+INTERPRETATION:
+--------------------------------------------------------------------------------
+- Higher importance values indicate stronger influence on compressive strength
+- Top features are the most critical for accurate predictions
+- Features with low importance may be considered for removal
+- Different models may rank features differently
+
+================================================================================
+                                 END OF REPORT                                  
+================================================================================

@@ -22,14 +22,19 @@ warnings.filterwarnings('ignore')
 
 # Set style for professional visualizations
 sns.set_style("whitegrid")
-plt.rcParams['figure.figsize'] = (12, 8)
-plt.rcParams['font.size'] = 10
-plt.rcParams['axes.titlesize'] = 14
-plt.rcParams['axes.titleweight'] = 'bold'
+plt.rcParams.update({
+    'font.size': 14,
+    'axes.titlesize': 20,
+    'axes.labelsize': 16,
+    'xtick.labelsize': 13,
+    'ytick.labelsize': 13,
+    'legend.fontsize': 13,
+    'figure.titlesize': 22
+})
 
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from src.utils import print_section, print_separator, create_directory, get_timestamp
+from src.utils import print_section, print_separator, create_directory, get_timestamp, format_feature_name
 
 
 class EDAAnalyzer:
@@ -191,12 +196,14 @@ class EDAAnalyzer:
         print_section("CORRELATION HEATMAP")
         
         # Get correlation matrix for numeric columns only
-        corr_matrix = self.numeric_df.corr()
+        corr_matrix = self.numeric_df.corr().copy()
         
-        # Create figure with appropriate size based on number of columns
-        n_cols = len(corr_matrix.columns)
-        figsize = (max(14, n_cols * 0.8), max(12, n_cols * 0.8))
-        fig, ax = plt.subplots(figsize=figsize)
+        # Clean up column and index names for printing
+        corr_matrix.columns = [format_feature_name(col) for col in corr_matrix.columns]
+        corr_matrix.index = [format_feature_name(idx) for idx in corr_matrix.index]
+        
+        # Create figure with large figure size
+        fig, ax = plt.subplots(figsize=(18, 14))
         
         # Create mask for upper triangle (shows only lower triangle for clarity)
         mask = np.triu(np.ones_like(corr_matrix, dtype=bool), k=1)
@@ -205,7 +212,7 @@ class EDAAnalyzer:
         sns.heatmap(
             corr_matrix,
             annot=True,           # Show correlation values
-            cmap='RdBu_r',        # Red-Blue colormap (reversed)
+            cmap='coolwarm',      # coolwarm colormap
             center=0,             # Center colormap at 0
             vmin=-1,              # Minimum value
             vmax=1,               # Maximum value
@@ -218,8 +225,7 @@ class EDAAnalyzer:
             },
             fmt='.2f',            # Format to 2 decimal places
             annot_kws={
-                "size": min(10, max(6, 12 - n_cols * 0.2)),
-                "weight": "bold"
+                "size": 9
             },
             mask=mask,            # Mask upper triangle
             ax=ax
@@ -227,8 +233,8 @@ class EDAAnalyzer:
         
         # Enhance title and labels
         ax.set_title(
-            'Feature Correlation Heatmap',
-            fontsize=18,
+            'Pearson Correlation Matrix of Geopolymer Composite Variables',
+            fontsize=20,
             fontweight='bold',
             pad=20
         )
@@ -237,13 +243,13 @@ class EDAAnalyzer:
         plt.xticks(
             rotation=45,
             ha='right',
-            fontsize=min(10, max(7, 12 - n_cols * 0.15))
+            fontsize=13
         )
         
         # Keep y-axis labels horizontal
         plt.yticks(
             rotation=0,
-            fontsize=min(10, max(7, 12 - n_cols * 0.15))
+            fontsize=13
         )
         
         # Adjust layout
@@ -251,7 +257,7 @@ class EDAAnalyzer:
         
         # Save plot with high resolution
         output_path = os.path.join(self.output_dir, f'correlation_heatmap_{get_timestamp()}.png')
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
         print(f"Correlation heatmap saved to: {output_path}")
         plt.close()
         
@@ -268,24 +274,31 @@ class EDAAnalyzer:
         print_section("FEATURE DISTRIBUTIONS")
         
         for col in self.numeric_columns:
-            fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+            fig, axes = plt.subplots(1, 2, figsize=(16, 7))
+            
+            cleaned_col = format_feature_name(col)
+            mean_val = self.df[col].mean()
+            median_val = self.df[col].median()
             
             # Histogram
-            sns.histplot(self.df[col], kde=True, ax=axes[0], color='skyblue')
-            axes[0].set_title(f'Distribution of {col}', fontsize=12, fontweight='bold')
-            axes[0].set_xlabel(col, fontsize=10)
-            axes[0].set_ylabel('Frequency', fontsize=10)
+            sns.histplot(self.df[col], kde=True, bins=30, edgecolor='black', linewidth=1, alpha=0.8, ax=axes[0], color='skyblue')
+            axes[0].axvline(mean_val, color='red', linestyle='--', linewidth=2, label=f'Mean: {mean_val:.2f}')
+            axes[0].axvline(median_val, color='green', linestyle='-', linewidth=2, label=f'Median: {median_val:.2f}')
+            axes[0].set_title(f'Distribution of {cleaned_col}', fontsize=16, fontweight='bold', pad=10)
+            axes[0].set_xlabel(cleaned_col, fontsize=14)
+            axes[0].set_ylabel('Frequency', fontsize=14)
+            axes[0].legend(fontsize=11)
             
             # Box plot
-            sns.boxplot(y=self.df[col], ax=axes[1], color='lightcoral')
-            axes[1].set_title(f'Box Plot of {col}', fontsize=12, fontweight='bold')
-            axes[1].set_ylabel(col, fontsize=10)
+            sns.boxplot(y=self.df[col], ax=axes[1], color='lightcoral', width=0.4, linewidth=1.5)
+            axes[1].set_title(f'Box Plot of {cleaned_col}', fontsize=16, fontweight='bold', pad=10)
+            axes[1].set_ylabel(cleaned_col, fontsize=14)
             
             plt.tight_layout()
             
             # Save plot
             output_path = os.path.join(self.output_dir, f'distribution_{col}_{get_timestamp()}.png')
-            plt.savefig(output_path, dpi=300, bbox_inches='tight')
+            plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
             print(f"Distribution plot for {col} saved")
             plt.close()
         
@@ -301,24 +314,31 @@ class EDAAnalyzer:
         """
         print_section("TARGET DISTRIBUTION")
         
-        fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+        fig, axes = plt.subplots(1, 2, figsize=(16, 7))
+        
+        cleaned_target = format_feature_name(self.target_column)
+        mean_val = self.df[self.target_column].mean()
+        median_val = self.df[self.target_column].median()
         
         # Histogram
-        sns.histplot(self.df[self.target_column], kde=True, ax=axes[0], color='darkgreen')
-        axes[0].set_title(f'Distribution of {self.target_column}', fontsize=12, fontweight='bold')
-        axes[0].set_xlabel(self.target_column, fontsize=10)
-        axes[0].set_ylabel('Frequency', fontsize=10)
+        sns.histplot(self.df[self.target_column], kde=True, bins=30, edgecolor='black', linewidth=1, alpha=0.8, ax=axes[0], color='darkgreen')
+        axes[0].axvline(mean_val, color='red', linestyle='--', linewidth=2, label=f'Mean: {mean_val:.2f}')
+        axes[0].axvline(median_val, color='green', linestyle='-', linewidth=2, label=f'Median: {median_val:.2f}')
+        axes[0].set_title(f'Distribution of {cleaned_target}', fontsize=16, fontweight='bold', pad=10)
+        axes[0].set_xlabel(cleaned_target, fontsize=14)
+        axes[0].set_ylabel('Frequency', fontsize=14)
+        axes[0].legend(fontsize=11)
         
         # Box plot
-        sns.boxplot(y=self.df[self.target_column], ax=axes[1], color='orange')
-        axes[1].set_title(f'Box Plot of {self.target_column}', fontsize=12, fontweight='bold')
-        axes[1].set_ylabel(self.target_column, fontsize=10)
+        sns.boxplot(y=self.df[self.target_column], ax=axes[1], color='orange', width=0.4, linewidth=1.5)
+        axes[1].set_title(f'Box Plot of {cleaned_target}', fontsize=16, fontweight='bold', pad=10)
+        axes[1].set_ylabel(cleaned_target, fontsize=14)
         
         plt.tight_layout()
         
         # Save plot
         output_path = os.path.join(self.output_dir, f'target_distribution_{get_timestamp()}.png')
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
         print(f"Target distribution plot saved to: {output_path}")
         plt.close()
     
@@ -338,15 +358,19 @@ class EDAAnalyzer:
         if len(self.numeric_columns) > 8:
             print(f"Showing scatter matrix for first 8 features")
         
+        # Clean column names for plotting
+        plot_df = self.df[plot_columns].copy()
+        plot_df.columns = [format_feature_name(col) for col in plot_df.columns]
+        
         # Create pairplot
-        sns.pairplot(self.df[plot_columns], diag_kind='kde', 
-                     plot_kws={'alpha': 0.6, 's': 30, 'edgecolor': 'k'},
+        sns.pairplot(plot_df, diag_kind='kde', 
+                     plot_kws={'alpha': 0.7, 's': 50, 'edgecolor': 'k'},
                      corner=True)
-        plt.suptitle('Scatter Plot Matrix', y=1.02, fontsize=16, fontweight='bold')
+        plt.suptitle('Scatter Plot Matrix', y=1.02, fontsize=20, fontweight='bold')
         
         # Save plot
         output_path = os.path.join(self.output_dir, f'scatter_matrix_{get_timestamp()}.png')
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
         print(f"Scatter matrix saved to: {output_path}")
         plt.close()
     
@@ -366,17 +390,26 @@ class EDAAnalyzer:
         n_cols = 3
         n_rows = (len(feature_columns) + n_cols - 1) // n_cols
         
-        fig, axes = plt.subplots(n_rows, n_cols, figsize=(15, 5*n_rows))
+        fig, axes = plt.subplots(n_rows, n_cols, figsize=(18, 6*n_rows))
         axes = axes.flatten() if n_rows > 1 else [axes]
+        
+        cleaned_target = format_feature_name(self.target_column)
         
         for idx, col in enumerate(feature_columns):
             if idx < len(axes):
-                axes[idx].scatter(self.df[col], self.df[self.target_column], 
-                                alpha=0.6, s=50, edgecolor='k', color='steelblue')
-                axes[idx].set_xlabel(col, fontsize=10)
-                axes[idx].set_ylabel(self.target_column, fontsize=10)
-                axes[idx].set_title(f'{col} vs {self.target_column}', fontsize=11, fontweight='bold')
-                axes[idx].grid(True, alpha=0.3)
+                cleaned_feature = format_feature_name(col)
+                # Plot with regression line
+                sns.regplot(
+                    x=self.df[col], 
+                    y=self.df[self.target_column], 
+                    ax=axes[idx],
+                    scatter_kws={'alpha': 0.7, 's': 80, 'edgecolor': 'k', 'color': 'steelblue'},
+                    line_kws={'color': 'red', 'linewidth': 2}
+                )
+                axes[idx].set_xlabel(cleaned_feature, fontsize=14)
+                axes[idx].set_ylabel(cleaned_target, fontsize=14)
+                axes[idx].set_title(f'{cleaned_feature} vs {cleaned_target}', fontsize=16, fontweight='bold', pad=10)
+                axes[idx].grid(True, linestyle='--', alpha=0.5)
         
         # Hide unused subplots
         for idx in range(len(feature_columns), len(axes)):
@@ -386,7 +419,7 @@ class EDAAnalyzer:
         
         # Save plot
         output_path = os.path.join(self.output_dir, f'feature_vs_target_{get_timestamp()}.png')
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
         print(f"Feature vs target plots saved to: {output_path}")
         plt.close()
     
@@ -400,17 +433,24 @@ class EDAAnalyzer:
         """
         print_section("BOXPLOTS")
         
-        fig, axes = plt.subplots(1, figsize=(14, 8))
-        self.numeric_df.boxplot(ax=axes, rot=45)
-        axes.set_title('Boxplot of All Features', fontsize=14, fontweight='bold')
-        axes.set_ylabel('Values', fontsize=12)
-        axes.grid(True, alpha=0.3, axis='y')
+        # Clean columns of numeric_df in a copy
+        plot_df = self.numeric_df.copy()
+        plot_df.columns = [format_feature_name(col) for col in plot_df.columns]
+        
+        fig, axes = plt.subplots(1, figsize=(18, 10))
+        
+        # Plot using seaborn boxplot for style
+        sns.boxplot(data=plot_df, ax=axes, palette='Set2')
+        plt.xticks(rotation=45, ha='right', fontsize=12)
+        axes.set_title('Boxplot of All Features', fontsize=20, fontweight='bold', pad=15)
+        axes.set_ylabel('Values', fontsize=16)
+        axes.grid(True, linestyle='--', alpha=0.5, axis='y')
         
         plt.tight_layout()
         
         # Save plot
         output_path = os.path.join(self.output_dir, f'boxplots_all_{get_timestamp()}.png')
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
         print(f"Boxplots saved to: {output_path}")
         plt.close()
     
@@ -460,7 +500,13 @@ class EDAAnalyzer:
 
 
 if __name__ == "__main__":
-    # Example usage
-    print("Exploratory Data Analysis Module")
-    print("This module provides EDA functionality.")
-    print("Import and use the EDAAnalyzer class in your main script.")
+    import pandas as pd
+    data_path = 'data/dataset.csv'
+    if os.path.exists(data_path):
+        print(f"Loading dataset from {data_path}...")
+        df = pd.read_csv(data_path)
+        analyzer = EDAAnalyzer(df)
+        analyzer.generate_all_plots()
+        print("EDA generation complete!")
+    else:
+        print(f"Error: Dataset not found at {data_path}")

@@ -19,6 +19,7 @@ import streamlit.components.v1 as components
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from src.utils import format_feature_name, format_metric_name
 
 # Set page configuration
 st.set_page_config(
@@ -28,8 +29,17 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Set visualization style
+# Set visualization style and global standards
 sns.set_style("whitegrid")
+plt.rcParams.update({
+    'font.size': 14,
+    'axes.titlesize': 20,
+    'axes.labelsize': 16,
+    'xtick.labelsize': 13,
+    'ytick.labelsize': 13,
+    'legend.fontsize': 13,
+    'figure.titlesize': 22
+})
 
 # Custom CSS for professional styling
 st.markdown("""
@@ -286,19 +296,20 @@ def main():
             # Create bar chart
             fig, ax = plt.subplots(figsize=(10, 6))
             bars = ax.bar(comparison_df['Model'], comparison_df['Predicted CS (MPa)'], 
-                         color=['#1f77b4', '#ff7f0e', '#2ca02c'], alpha=0.7, edgecolor='k')
-            ax.set_ylabel('Compressive Strength (MPa)', fontsize=12)
-            ax.set_title('Model Comparison', fontsize=14, fontweight='bold')
-            ax.grid(True, alpha=0.3, axis='y')
+                         color=['#1f77b4', '#ff7f0e', '#2ca02c'], alpha=0.8, edgecolor='k', width=0.4)
+            ax.set_ylabel('Predicted Compressive Strength (MPa)', fontsize=16)
+            ax.set_title('Model Prediction Comparison', fontsize=20, fontweight='bold', pad=15)
+            ax.grid(True, linestyle='--', alpha=0.5, axis='y')
             
             # Add value labels on bars
             for bar in bars:
                 height = bar.get_height()
-                ax.text(bar.get_x() + bar.get_width()/2., height,
-                       f'{height:.2f}', ha='center', va='bottom', fontsize=10)
+                ax.text(bar.get_x() + bar.get_width()/2., height * 1.01,
+                       f'{height:.2f}', ha='center', va='bottom', fontsize=12, fontweight='bold')
             
             plt.tight_layout()
-            st.pyplot(fig)
+            st.pyplot(fig, dpi=300)
+            plt.close()
             
             st.dataframe(comparison_df, use_container_width=True, hide_index=True)
         
@@ -362,15 +373,18 @@ def main():
                 # Visual comparison of R2 and MAE across models
                 st.markdown("#### Validation Consistency Visualizer")
                 fig, ax = plt.subplots(figsize=(10, 5))
-                # filter to mean metrics
-                mean_metrics = comp_df[comp_df['Metric'].str.contains('Mean')]
+                
+                # Melt dataset to plot Monte Carlo Mean vs 10-Fold Mean next to each other
+                melt_df = comp_df.melt(id_vars=['Model', 'Metric'], value_vars=['Monte Carlo Mean', '10-Fold Mean'],
+                                      var_name='Method', value_name='Score')
                 
                 # Plot using seaborn
-                sns.barplot(x='Metric', y='10-Fold CV', hue='Model', data=mean_metrics, ax=ax, palette='muted')
-                ax.set_title("10-Fold Cross-Validation Mean Performance")
-                ax.set_ylabel("Metric Value")
-                ax.grid(True, alpha=0.3)
-                st.pyplot(fig)
+                sns.barplot(x='Metric', y='Score', hue='Method', data=melt_df, ax=ax, palette='Set1')
+                ax.set_title("Validation Methodology Comparison (Mean)", fontsize=18, fontweight='bold', pad=15)
+                ax.set_ylabel("Metric Value", fontsize=14)
+                ax.set_xlabel("Metric", fontsize=14)
+                ax.grid(True, linestyle='--', alpha=0.5)
+                st.pyplot(fig, dpi=300)
                 plt.close()
             else:
                 st.warning("Validation comparison table not found. Please run the validation script first.")
@@ -415,21 +429,41 @@ def main():
                 cv_summary = pd.read_csv(cv_summary_path)
                 st.dataframe(cv_summary, use_container_width=True, hide_index=True)
                 
-                col_box1, col_box2 = st.columns(2)
-                with col_box1:
-                    r2_box = 'outputs/cross_validation/r2_boxplot.png'
-                    if os.path.exists(r2_box):
-                        st.image(r2_box, caption="Figure 1: R² score distribution across folds", use_column_width=True)
-                    mae_box = 'outputs/cross_validation/mae_boxplot.png'
-                    if os.path.exists(mae_box):
-                        st.image(mae_box, caption="Figure 2: MAE distribution across folds", use_column_width=True)
-                with col_box2:
-                    rmse_box = 'outputs/cross_validation/rmse_boxplot.png'
-                    if os.path.exists(rmse_box):
-                        st.image(rmse_box, caption="Figure 3: RMSE distribution across folds", use_column_width=True)
-                    model_comp_img = 'outputs/cross_validation/model_comparison.png'
-                    if os.path.exists(model_comp_img):
-                        st.image(model_comp_img, caption="Figure 4: Model metric comparison (Mean ± SD)", use_column_width=True)
+                plot_type = st.radio("Select Plot Type to View", ["Boxplots", "Histograms"], horizontal=True)
+                
+                col_img1, col_img2 = st.columns(2)
+                
+                with col_img1:
+                    if plot_type == "Boxplots":
+                        r2_img = 'outputs/cross_validation/r2_boxplot.png'
+                        mae_img = 'outputs/cross_validation/mae_boxplot.png'
+                    else:
+                        r2_img = 'outputs/cross_validation/r2_histogram.png'
+                        mae_img = 'outputs/cross_validation/mae_histogram.png'
+                        
+                    if os.path.exists(r2_img):
+                        st.image(r2_img, caption=f"R² Distribution ({plot_type})", use_column_width=True)
+                    if os.path.exists(mae_img):
+                        st.image(mae_img, caption=f"MAE Distribution ({plot_type})", use_column_width=True)
+                        
+                with col_img2:
+                    if plot_type == "Boxplots":
+                        rmse_img = 'outputs/cross_validation/rmse_boxplot.png'
+                        mse_img = 'outputs/cross_validation/mse_boxplot.png'
+                    else:
+                        rmse_img = 'outputs/cross_validation/rmse_histogram.png'
+                        mse_img = 'outputs/cross_validation/mse_histogram.png'
+                        
+                    if os.path.exists(rmse_img):
+                        st.image(rmse_img, caption=f"RMSE Distribution ({plot_type})", use_column_width=True)
+                    if os.path.exists(mse_img):
+                        st.image(mse_img, caption=f"MSE Distribution ({plot_type})", use_column_width=True)
+                
+                # Master Model Comparison Image
+                model_comp_img = 'outputs/cross_validation/model_comparison.png'
+                if os.path.exists(model_comp_img):
+                    st.markdown("---")
+                    st.image(model_comp_img, caption="Figure 5: Master Cross-Validation Metric Comparison (Mean ± SD)", use_column_width=True)
                         
                 # Add outlier/stability flags
                 st.markdown("#### 🔍 Stability Verification & Outlier Check")
@@ -536,12 +570,15 @@ def main():
                         if isinstance(local_shap, list) and len(local_shap) == 1:
                             local_shap = local_shap[0]
                             
+                        # Clean feature names for display
+                        cleaned_feature_names = [format_feature_name(f) for f in FEATURE_NAMES]
+                        
                         # Explanation object using original units
                         local_exp = shap.Explanation(
                             values=local_shap[0],
                             base_values=explainer.expected_value,
                             data=input_df.iloc[0].values,
-                            feature_names=FEATURE_NAMES
+                            feature_names=cleaned_feature_names
                         )
                     
                     # Display Waterfall plot
@@ -551,11 +588,11 @@ def main():
                         "is adjusted by each material to arrive at the final predicted strength (represented at the top). "
                         "Red blocks indicate positive contributions (increasing strength), and blue blocks indicate negative contributions."
                     )
-                    fig, ax = plt.subplots(figsize=(10, 6))
-                    shap.plots.waterfall(local_exp, show=False)
-                    plt.title("SHAP Waterfall: Material Contributions to Predicted Strength", fontsize=12, fontweight='bold', pad=10)
+                    fig, ax = plt.subplots(figsize=(12, 8))
+                    shap.plots.waterfall(local_exp, max_display=10, show=False)
+                    plt.title("SHAP Waterfall: Material Contributions to Predicted Strength", fontsize=20, fontweight='bold', pad=15)
                     plt.tight_layout()
-                    st.pyplot(fig)
+                    st.pyplot(fig, dpi=300)
                     plt.close()
                     
                     # Display Interactive Force Plot

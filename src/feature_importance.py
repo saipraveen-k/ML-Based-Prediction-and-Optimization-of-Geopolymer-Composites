@@ -14,12 +14,19 @@ warnings.filterwarnings('ignore')
 
 # Set style for better visualizations
 sns.set_style("whitegrid")
-plt.rcParams['figure.figsize'] = (12, 8)
-plt.rcParams['font.size'] = 10
+plt.rcParams.update({
+    'font.size': 14,
+    'axes.titlesize': 20,
+    'axes.labelsize': 16,
+    'xtick.labelsize': 13,
+    'ytick.labelsize': 13,
+    'legend.fontsize': 13,
+    'figure.titlesize': 22
+})
 
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from src.utils import print_section, print_separator, create_directory, get_timestamp
+from src.utils import print_section, print_separator, create_directory, get_timestamp, format_feature_name
 
 
 class FeatureImportanceAnalyzer:
@@ -172,28 +179,29 @@ class FeatureImportanceAnalyzer:
         
         plt.figure(figsize=(12, 8))
         
-        # Create horizontal bar plot
-        bars = plt.barh(range(len(top_features)), top_features.values, color='steelblue', alpha=0.7, edgecolor='k')
+        # Create horizontal bar plot with zorder to draw grid behind bars
+        bars = plt.barh(range(len(top_features)), top_features.values, color='steelblue', alpha=0.8, edgecolor='k', zorder=3)
         
         # Add value labels
         for i, (idx, bar) in enumerate(zip(top_features.index, bars)):
             width = bar.get_width()
-            plt.text(width, bar.get_y() + bar.get_height()/2,
-                    f'{width:.4f}', ha='left', va='center', fontsize=10)
+            plt.text(width + (width * 0.01), bar.get_y() + bar.get_height()/2,
+                    f'{width:.4f}', ha='left', va='center', fontsize=11, fontweight='bold')
         
-        plt.yticks(range(len(top_features)), top_features.index)
-        plt.xlabel('Importance Score', fontsize=12)
-        plt.ylabel('Features', fontsize=12)
-        plt.title(f'Feature Importance - {model_name} (Top {top_n})', fontsize=14, fontweight='bold')
+        cleaned_index = [format_feature_name(feat) for feat in top_features.index]
+        plt.yticks(range(len(top_features)), cleaned_index, fontsize=12)
+        plt.xlabel('Importance Score', fontsize=16)
+        plt.ylabel('Features', fontsize=16)
+        plt.title(f'Feature Importance - {model_name} (Top {top_n})', fontsize=20, fontweight='bold', pad=15)
         plt.gca().invert_yaxis()
-        plt.grid(True, alpha=0.3, axis='x')
+        plt.grid(True, linestyle='--', alpha=0.5, axis='x', zorder=0)
         
         plt.tight_layout()
         
         # Save plot
         output_path = os.path.join(self.output_dir, 'graphs',
                                  f'feature_importance_{model_name}_{get_timestamp()}.png')
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
         print(f"Feature importance plot for {model_name} saved")
         plt.close()
     
@@ -256,27 +264,26 @@ class FeatureImportanceAnalyzer:
         
         comparison_df = pd.DataFrame(comparison_data)
         
-        # Plot grouped bar chart
-        plt.figure(figsize=(14, 8))
-        
         # Pivot for plotting
         pivot_df = comparison_df.pivot(index='Feature', columns='Model', values='Importance')
+        pivot_df.index = [format_feature_name(feat) for feat in pivot_df.index]
         
-        # Plot
-        pivot_df.plot(kind='bar', figsize=(14, 8), alpha=0.7, edgecolor='k')
-        plt.xlabel('Features', fontsize=12)
-        plt.ylabel('Importance Score', fontsize=12)
-        plt.title(f'Feature Importance Comparison Across Models (Top {top_n})', fontsize=14, fontweight='bold')
-        plt.legend(title='Model', fontsize=10)
-        plt.xticks(rotation=45, ha='right')
-        plt.grid(True, alpha=0.3, axis='y')
+        # Plot grouped bar chart
+        fig, ax = plt.subplots(figsize=(14, 8))
+        pivot_df.plot(kind='bar', ax=ax, alpha=0.8, edgecolor='k', width=0.6, zorder=3)
+        plt.xlabel('Features', fontsize=16)
+        plt.ylabel('Importance Score', fontsize=16)
+        plt.title(f'Feature Importance Comparison Across Models (Top {top_n})', fontsize=20, fontweight='bold', pad=15)
+        plt.legend(title='Model', fontsize=12)
+        plt.xticks(rotation=45, ha='right', fontsize=12)
+        plt.grid(True, linestyle='--', alpha=0.5, axis='y', zorder=0)
         
         plt.tight_layout()
         
         # Save plot
         output_path = os.path.join(self.output_dir, 'graphs',
                                  f'feature_importance_comparison_{get_timestamp()}.png')
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
         print(f"Feature importance comparison plot saved")
         plt.close()
     
@@ -364,7 +371,36 @@ class FeatureImportanceAnalyzer:
 
 
 if __name__ == "__main__":
-    # Example usage
-    print("Feature Importance Analysis Module")
-    print("This module provides feature importance analysis functionality.")
-    print("Import and use the FeatureImportanceAnalyzer class in your main script.")
+    from src.data_preprocessing import DataPreprocessor
+    from src.utils import load_model
+    
+    data_path = 'data/dataset.csv'
+    if os.path.exists(data_path):
+        print(f"Loading dataset and running preprocessing pipeline...")
+        preprocessor = DataPreprocessor(data_path=data_path, target_column='Compressive_Strength_MPa')
+        X_train, X_test, y_train, y_test = preprocessor.preprocess_pipeline(test_size=0.3, random_state=42)
+        
+        # Load trained models
+        models = {}
+        model_paths = {
+            'Random Forest': 'models/random_forest.pkl',
+            'SVR': 'models/svr.pkl',
+            'XGBoost': 'models/xgboost.pkl'
+        }
+        for name, path in model_paths.items():
+            if os.path.exists(path):
+                models[name] = load_model(path)
+            else:
+                print(f"WARNING: Model {name} not found at {path}")
+                
+        if models:
+            analyzer = FeatureImportanceAnalyzer(models, preprocessor.feature_names)
+            analyzer.analyze_all_models(X_train, y_train)
+            analyzer.plot_all_importances()
+            analyzer.plot_comparison()
+            analyzer.generate_summary_report()
+            print("Feature importance analysis complete!")
+        else:
+            print("Error: No models loaded. Please train models first.")
+    else:
+        print(f"Error: Dataset not found at {data_path}")

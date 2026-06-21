@@ -128,31 +128,22 @@ To compare the two validation methodologies:
 
 The table below contrasts the outcomes:
 
-| Model | Metric | Monte Carlo | 10-Fold CV | Difference |
-| :--- | :--- | :---: | :---: | :---: |
-| Random Forest | Mean R² | 0.9636 | 0.9690 | -0.0055 |
-| Random Forest | Std R² | 0.0066 | 0.0096 | -0.0030 |
-| Random Forest | Mean MAE | 3.3383 | 3.0077 | 0.3306 |
-| Random Forest | Std MAE | 0.2365 | 0.3179 | -0.0815 |
-| Random Forest | Mean RMSE | 4.9604 | 4.3955 | 0.5649 |
-| Random Forest | Std RMSE | 0.4307 | 0.5138 | -0.0831 |
-| SVR | Mean R² | 0.9594 | 0.9618 | -0.0024 |
-| SVR | Std R² | 0.0063 | 0.0147 | -0.0083 |
-| SVR | Mean MAE | 3.6697 | 3.4376 | 0.2322 |
-| SVR | Std MAE | 0.2204 | 0.6124 | -0.3920 |
-| SVR | Mean RMSE | 5.2386 | 4.8777 | 0.3609 |
-| SVR | Std RMSE | 0.3502 | 0.8062 | -0.4560 |
-| XGBoost | Mean R² | 0.9764 | 0.9800 | -0.0037 |
-| XGBoost | Std R² | 0.0043 | 0.0074 | -0.0031 |
-| XGBoost | Mean MAE | 2.6327 | 2.3423 | 0.2904 |
-| XGBoost | Std MAE | 0.1939 | 0.2958 | -0.1019 |
-| XGBoost | Mean RMSE | 3.9965 | 3.4867 | 0.5098 |
-| XGBoost | Std RMSE | 0.3745 | 0.5297 | -0.1552 |
+| Model | Metric | Monte Carlo Mean | Monte Carlo Std | 10-Fold Mean | 10-Fold Std |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| Random Forest | R² | 0.9636 | 0.0066 | 0.9690 | 0.0096 |
+| Random Forest | MAE | 3.3383 | 0.2365 | 3.0077 | 0.3179 |
+| Random Forest | RMSE | 4.9604 | 0.4307 | 4.3955 | 0.5138 |
+| SVR | R² | 0.9594 | 0.0063 | 0.9618 | 0.0147 |
+| SVR | MAE | 3.6697 | 0.2204 | 3.4376 | 0.6124 |
+| SVR | RMSE | 5.2386 | 0.3502 | 4.8777 | 0.8062 |
+| XGBoost | R² | 0.9764 | 0.0043 | 0.9800 | 0.0074 |
+| XGBoost | MAE | 2.6327 | 0.1939 | 2.3423 | 0.2958 |
+| XGBoost | RMSE | 3.9965 | 0.3745 | 3.4867 | 0.5297 |
 
 
 ### Publication-Ready Statement
 > [!TIP]
-> **Scientific Consensus**: The XGBoost model achieved the highest average R² score of 0.9800 with the lowest standard deviation (0.0074) across all 10 folds, indicating superior predictive stability and resilience against different data partitions. This model yielded an average MAE of 2.34 MPa and RMSE of 3.49 MPa, outperforming the Random Forest (R² = 0.9690 ± 0.0096, MAE = 3.01 MPa) and SVR models (R² = 0.9618 ± 0.0147, MAE = 3.44 MPa).
+> **Scientific Consensus**: Cross-validation and Monte Carlo validation produced highly consistent performance estimates, indicating strong model robustness and low sensitivity to data partitioning.
 
 ---
 

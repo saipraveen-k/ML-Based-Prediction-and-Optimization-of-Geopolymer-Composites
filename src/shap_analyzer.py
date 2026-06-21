@@ -16,17 +16,19 @@ import shap
 
 # Set style for publication-ready visualizations
 sns.set_style("white")
-plt.rcParams['font.family'] = 'serif'
-plt.rcParams['font.size'] = 11
-plt.rcParams['axes.labelsize'] = 12
-plt.rcParams['axes.titlesize'] = 13
-plt.rcParams['xtick.labelsize'] = 10
-plt.rcParams['ytick.labelsize'] = 10
-plt.rcParams['figure.titlesize'] = 14
+plt.rcParams.update({
+    'font.size': 14,
+    'axes.titlesize': 20,
+    'axes.labelsize': 16,
+    'xtick.labelsize': 13,
+    'ytick.labelsize': 13,
+    'legend.fontsize': 13,
+    'figure.titlesize': 22
+})
 
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from src.utils import print_section, print_separator, create_directory, get_timestamp
+from src.utils import print_section, print_separator, create_directory, get_timestamp, format_feature_name
 
 
 class SHAPAnalyzer:
@@ -110,6 +112,10 @@ class SHAPAnalyzer:
             # XGBoost might wrap it in a list for single-output regression
             self.shap_values = self.shap_values[0]
             
+        # Format feature names for publication-quality display
+        self.cleaned_feature_names = [format_feature_name(f) for f in self.feature_names]
+        self.X_original.columns = self.cleaned_feature_names
+        
         # Create a proper shap.Explanation object for modern plotting functions.
         # Note: We associate the SHAP values with X_original (unscaled features) 
         # so that the plots display the real physical units of the features!
@@ -117,7 +123,7 @@ class SHAPAnalyzer:
             values=self.shap_values,
             base_values=np.array([self.explainer.expected_value] * len(self.X_original)),
             data=self.X_original.values,
-            feature_names=self.feature_names
+            feature_names=self.cleaned_feature_names
         )
         
         # Analyze feature importance and directions
@@ -135,12 +141,12 @@ class SHAPAnalyzer:
         
         # Sort features by importance
         sorted_indices = np.argsort(mean_abs_shap)[::-1]
-        self.top_features = [self.feature_names[i] for i in sorted_indices]
+        self.top_features = [self.cleaned_feature_names[i] for i in sorted_indices]
         
         # Determine direction of influence for each feature
         # (Positive correlation between feature values and SHAP values means positive influence)
         self.feature_directions = {}
-        for i, feature in enumerate(self.feature_names):
+        for i, feature in enumerate(self.cleaned_feature_names):
             feat_vals = self.X_original[feature].values
             shap_vals = self.shap_values[:, i]
             
@@ -161,17 +167,17 @@ class SHAPAnalyzer:
         Generate and save SHAP Summary Plot.
         """
         print("Generating Figure 1: SHAP Summary Plot...")
-        plt.figure(figsize=(10, 6.5))
+        plt.figure(figsize=(12, 8))
         
         # Use unscaled features X_original to display real physical units
-        shap.summary_plot(self.shap_values, self.X_original, show=False)
+        shap.summary_plot(self.shap_values, self.X_original, plot_size=(12, 8), show=False)
         
-        plt.title('SHAP Summary Plot', fontsize=14, fontweight='bold', pad=15)
-        plt.xlabel('SHAP Value (Impact on Compressive Strength, MPa)', fontsize=12)
+        plt.title('SHAP Summary Plot', fontsize=20, fontweight='bold', pad=15)
+        plt.xlabel('SHAP Value (Impact on Compressive Strength, MPa)', fontsize=16)
         plt.tight_layout()
         
         output_path = os.path.join(self.shap_dir, 'shap_summary.png')
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
         plt.close()
         print(f"Summary plot saved to: {output_path}")
         
@@ -180,17 +186,17 @@ class SHAPAnalyzer:
         Generate and save SHAP Beeswarm Plot.
         """
         print("Generating Figure 2: SHAP Beeswarm Plot...")
-        plt.figure(figsize=(10, 6.5))
+        plt.figure(figsize=(12, 8))
         
         # Beeswarm plot using the Explanation object
-        shap.plots.beeswarm(self.explanation, show=False)
+        shap.plots.beeswarm(self.explanation, plot_size=(12, 8), show=False)
         
-        plt.title('SHAP Beeswarm Plot', fontsize=14, fontweight='bold', pad=15)
-        plt.xlabel('SHAP Value (Impact on Compressive Strength, MPa)', fontsize=12)
+        plt.title('SHAP Beeswarm Plot', fontsize=20, fontweight='bold', pad=15)
+        plt.xlabel('SHAP Value (Impact on Compressive Strength, MPa)', fontsize=16)
         plt.tight_layout()
         
         output_path = os.path.join(self.shap_dir, 'shap_beeswarm.png')
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
         plt.close()
         print(f"Beeswarm plot saved to: {output_path}")
         
@@ -199,17 +205,17 @@ class SHAPAnalyzer:
         Generate and save SHAP Global Bar Plot.
         """
         print("Generating SHAP Bar Plot (Global Importance)...")
-        plt.figure(figsize=(10, 6.5))
+        plt.figure(figsize=(12, 8))
         
         # Bar plot using the Explanation object
-        shap.plots.bar(self.explanation, max_display=len(self.feature_names), show=False)
+        shap.plots.bar(self.explanation, max_display=len(self.feature_names), plot_size=(12, 8), show=False)
         
-        plt.title('Global Feature Importance (Mean Absolute SHAP Value)', fontsize=14, fontweight='bold', pad=15)
-        plt.xlabel('mean(|SHAP value|) (Average Impact magnitude, MPa)', fontsize=12)
+        plt.title('Global Feature Importance (Mean Absolute SHAP Value)', fontsize=20, fontweight='bold', pad=15)
+        plt.xlabel('mean(|SHAP value|) (Average Impact magnitude, MPa)', fontsize=16)
         plt.tight_layout()
         
         output_path = os.path.join(self.shap_dir, 'shap_bar.png')
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
         plt.close()
         print(f"Bar plot saved to: {output_path}")
         
@@ -226,7 +232,7 @@ class SHAPAnalyzer:
         
         for idx in range(min(top_n, len(self.top_features))):
             feature = self.top_features[idx]
-            plt.figure(figsize=(8, 5.5))
+            plt.figure(figsize=(12, 8))
             
             # shap.dependence_plot automatically finds the best interaction feature 
             # and colors the points accordingly if we pass X_original.
@@ -239,15 +245,15 @@ class SHAPAnalyzer:
                 interaction_index='auto'
             )
             
-            plt.title(f'SHAP Dependence: {feature}', fontsize=13, fontweight='bold', pad=12)
-            plt.ylabel(f'SHAP Value ({feature} Impact, MPa)', fontsize=11)
-            plt.xlabel(f'{feature} (Original Values)', fontsize=11)
-            plt.grid(True, alpha=0.15)
+            plt.title(f'SHAP Dependence: {feature}', fontsize=20, fontweight='bold', pad=15)
+            plt.ylabel(f'SHAP Value (Impact, MPa)', fontsize=16)
+            plt.xlabel(f'{feature}', fontsize=16)
+            plt.grid(True, linestyle='--', alpha=0.5)
             plt.tight_layout()
             
             output_name = f'dependence_feature_{idx+1}.png'
             output_path = os.path.join(self.shap_dir, output_name)
-            plt.savefig(output_path, dpi=300, bbox_inches='tight')
+            plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
             plt.close()
             print(f"Dependence plot for '{feature}' saved to: {output_path}")
             
@@ -261,16 +267,16 @@ class SHAPAnalyzer:
             Index of the sample to plot
         """
         print(f"Generating SHAP Waterfall Plot for Sample #{sample_idx}...")
-        plt.figure(figsize=(10, 6.5))
+        plt.figure(figsize=(12, 8))
         
         # Plot waterfall for the selected sample
-        shap.plots.waterfall(self.explanation[sample_idx], show=False)
+        shap.plots.waterfall(self.explanation[sample_idx], max_display=10, show=False)
         
-        plt.title(f'SHAP Prediction Explanation - Sample #{sample_idx}', fontsize=14, fontweight='bold', pad=15)
+        plt.title(f'SHAP Prediction Explanation - Sample #{sample_idx}', fontsize=20, fontweight='bold', pad=15)
         plt.tight_layout()
         
         output_path = os.path.join(self.shap_dir, 'shap_waterfall.png')
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
         plt.close()
         print(f"Waterfall plot saved to: {output_path}")
         

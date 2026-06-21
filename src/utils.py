@@ -311,3 +311,109 @@ def create_results_dict(model_name, metrics, predictions=None):
     if predictions is not None:
         results['predictions'] = predictions
     return results
+
+
+def format_feature_name(name):
+    """
+    Format a raw feature/variable name to a publication-quality label with proper units.
+    """
+    if not isinstance(name, str):
+        return name
+        
+    # Specific known feature mapping overrides for clean titles and units
+    known_mappings = {
+        'Cement_kg_m3': 'Cement (kg/m³)',
+        'Fly_Ash_kg_m3': 'Fly Ash (kg/m³)',
+        'Silica_Fume_kg_m3': 'Silica Fume (kg/m³)',
+        'Metakaolin_kg_m3': 'Metakaolin (kg/m³)',
+        'GGBS_kg_m3': 'GGBS (kg/m³)',
+        'RHA_kg_m3': 'Rice Husk Ash (kg/m³)',
+        'POFA_kg_m3': 'POFA (kg/m³)',
+        'Fine_Sand_kg_m3': 'Fine Sand (kg/m³)',
+        'Water_kg_m3': 'Water (kg/m³)',
+        'Extra_Water_kg_m3': 'Extra Water (kg/m³)',
+        'Water_Binder_Ratio': 'Water/Binder Ratio',
+        'Na2SiO3_Content_kg_m3': 'Na₂SiO₃ (kg/m³)',
+        'NaOH_Content_kg_m3': 'NaOH (kg/m³)',
+        'KOH_Content_kg_m3': 'KOH (kg/m³)',
+        'Activator_Molarity_M': 'Activator Molarity (M)',
+        'Superplasticizer_kg_m3': 'Superplasticizer (kg/m³)',
+        'Polypropylene_Fiber_Content_%': 'Polypropylene Fiber Content (%)',
+        'PP_Fiber_kg_m3': 'PP Fiber (kg/m³)',
+        'Fiber_Length_mm': 'Fiber Length (mm)',
+        'Curing_Temperature_C': 'Curing Temperature (°C)',
+        'Curing_Duration_days': 'Curing Duration (days)',
+        'Compressive_Strength_MPa': 'Compressive Strength (MPa)',
+        'Flexural_Strength_MPa': 'Flexural Strength (MPa)',
+        'Tensile_Strength_MPa': 'Tensile Strength (MPa)',
+        'Elastic_Modulus_GPa': 'Elastic Modulus (GPa)',
+        'Interlayer_Bond_Strength_MPa': 'Interlayer Bond Strength (MPa)'
+    }
+    
+    if name in known_mappings:
+        return known_mappings[name]
+        
+    formatted = name
+    
+    # Replace unit suffixes like kgperm3, kg_per_m3, kg_m3
+    unit_map = {
+        'kgperm3': ' (kg/m³)',
+        'kg_per_m3': ' (kg/m³)',
+        'kg_m3': ' (kg/m³)',
+        'MPa': ' (MPa)',
+        'GPa': ' (GPa)',
+        '_C': ' (°C)',
+        '_mm': ' (mm)',
+        '_days': ' (days)',
+        '_%': ' (%)',
+        '_M': ' (M)'
+    }
+    
+    # Handle Water_Binder_Ratio -> Water/Binder Ratio
+    if 'Water_Binder' in formatted:
+        formatted = formatted.replace('Water_Binder', 'Water/Binder')
+    
+    # Apply replacements of units
+    for raw_unit, clean_unit in unit_map.items():
+        if formatted.endswith(f'_{raw_unit}'):
+            formatted = formatted[:-len(raw_unit)-1] + clean_unit
+            break
+        elif formatted.endswith(raw_unit):
+            formatted = formatted[:-len(raw_unit)] + clean_unit
+            break
+            
+    # Clean up underscores and strip double spaces
+    formatted = formatted.replace('_', ' ')
+    formatted = ' '.join(formatted.split())
+    
+    return formatted
+
+
+def format_metric_name(metric):
+    """
+    Format a metric name to publication standard.
+    """
+    if not isinstance(metric, str):
+        return metric
+        
+    mapping = {
+        'r2_scores': 'R² Score',
+        'r2': 'R² Score',
+        'mean r2': 'Mean R² Score',
+        'std r2': 'Std R² Score',
+        'mae_scores': 'MAE (MPa)',
+        'mae': 'MAE (MPa)',
+        'mean mae': 'Mean MAE (MPa)',
+        'std mae': 'Std MAE (MPa)',
+        'rmse_scores': 'RMSE (MPa)',
+        'rmse': 'RMSE (MPa)',
+        'mean rmse': 'Mean RMSE (MPa)',
+        'std rmse': 'Std RMSE (MPa)',
+        'mse_scores': 'MSE (MPa²)',
+        'mse': 'MSE (MPa²)',
+        'mean mse': 'Mean MSE (MPa²)',
+        'std mse': 'Std MSE (MPa²)'
+    }
+    
+    return mapping.get(metric.lower(), metric)
+

@@ -17,12 +17,19 @@ warnings.filterwarnings('ignore')
 
 # Set style for better visualizations
 sns.set_style("whitegrid")
-plt.rcParams['figure.figsize'] = (12, 8)
-plt.rcParams['font.size'] = 10
+plt.rcParams.update({
+    'font.size': 14,
+    'axes.titlesize': 20,
+    'axes.labelsize': 16,
+    'xtick.labelsize': 13,
+    'ytick.labelsize': 13,
+    'legend.fontsize': 13,
+    'figure.titlesize': 22
+})
 
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from src.utils import print_section, print_separator, create_directory, get_timestamp
+from src.utils import print_section, print_separator, create_directory, get_timestamp, format_metric_name
 
 
 class MonteCarloSimulation:
@@ -178,33 +185,34 @@ class MonteCarloSimulation:
         results = self.simulation_results[model_name]
         values = results[metric]
         
-        metric_label = metric.replace('_scores', '').upper()
+        metric_label = format_metric_name(metric)
+        metric_clean = metric.replace('_scores', '').lower()
         
-        fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+        fig, axes = plt.subplots(1, 2, figsize=(16, 7))
         
         # Histogram
         axes[0].hist(values, bins=30, edgecolor='k', color='steelblue', alpha=0.7, density=True)
-        axes[0].axvline(x=results[f'{metric_label.lower()}_mean'], color='r', linestyle='--', lw=2, 
-                       label=f'Mean: {results[f"{metric_label.lower()}_mean"]:.4f}')
-        axes[0].set_xlabel(metric_label, fontsize=12)
-        axes[0].set_ylabel('Density', fontsize=12)
-        axes[0].set_title(f'Distribution of {metric_label} - {model_name}', fontsize=12, fontweight='bold')
-        axes[0].legend(fontsize=10)
-        axes[0].grid(True, alpha=0.3, axis='y')
+        axes[0].axvline(x=results[f'{metric_clean}_mean'], color='r', linestyle='--', lw=2, 
+                       label=f'Mean: {results[f"{metric_clean}_mean"]:.4f}')
+        axes[0].set_xlabel(metric_label, fontsize=14)
+        axes[0].set_ylabel('Density', fontsize=14)
+        axes[0].set_title(f'Distribution of {metric_label} - {model_name}', fontsize=16, fontweight='bold', pad=10)
+        axes[0].legend(fontsize=11)
+        axes[0].grid(True, linestyle='--', alpha=0.5, axis='y')
         
         # Box plot
         axes[1].boxplot(values, vert=True, patch_artist=True,
                        boxprops=dict(facecolor='lightcoral', alpha=0.7))
-        axes[1].set_ylabel(metric_label, fontsize=12)
-        axes[1].set_title(f'Box Plot of {metric_label} - {model_name}', fontsize=12, fontweight='bold')
-        axes[1].grid(True, alpha=0.3, axis='y')
+        axes[1].set_ylabel(metric_label, fontsize=14)
+        axes[1].set_title(f'Box Plot of {metric_label} - {model_name}', fontsize=16, fontweight='bold', pad=10)
+        axes[1].grid(True, linestyle='--', alpha=0.5, axis='y')
         
         plt.tight_layout()
         
         # Save plot
         output_path = os.path.join(self.output_dir, 'graphs', 
                                  f'monte_carlo_{metric}_{model_name}_{get_timestamp()}.png')
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
         print(f"Distribution plot for {metric} - {model_name} saved")
         plt.close()
     
@@ -229,29 +237,30 @@ class MonteCarloSimulation:
         results = self.simulation_results[model_name]
         values = results[metric]
         
-        metric_label = metric.replace('_scores', '').upper()
+        metric_label = format_metric_name(metric)
+        metric_clean = metric.replace('_scores', '').lower()
         
         plt.figure(figsize=(10, 6))
         
-        # Plot PDF using KDE
-        sns.kdeplot(values, shade=True, color='darkgreen', alpha=0.7)
-        plt.axvline(x=results[f'{metric_label.lower()}_mean'], color='r', linestyle='--', lw=2,
-                   label=f'Mean: {results[f"{metric_label.lower()}_mean"]:.4f}')
+        # Plot PDF using KDE with linewidth=3
+        sns.kdeplot(values, fill=True, color='darkgreen', alpha=0.7, lw=3)
+        plt.axvline(x=results[f'{metric_clean}_mean'], color='r', linestyle='--', lw=2,
+                   label=f'Mean: {results[f"{metric_clean}_mean"]:.4f}')
         plt.axvline(x=np.median(values), color='orange', linestyle='--', lw=2,
                    label=f'Median: {np.median(values):.4f}')
         
-        plt.xlabel(metric_label, fontsize=12)
-        plt.ylabel('Probability Density', fontsize=12)
-        plt.title(f'PDF of {metric_label} - {model_name}', fontsize=14, fontweight='bold')
-        plt.legend(fontsize=10)
-        plt.grid(True, alpha=0.3, axis='y')
+        plt.xlabel(metric_label, fontsize=16)
+        plt.ylabel('Probability Density', fontsize=16)
+        plt.title(f'PDF of {metric_label} - {model_name}', fontsize=20, fontweight='bold', pad=15)
+        plt.legend(fontsize=13)
+        plt.grid(True, linestyle='--', alpha=0.5)
         
         plt.tight_layout()
         
         # Save plot
         output_path = os.path.join(self.output_dir, 'graphs',
                                  f'monte_carlo_pdf_{metric}_{model_name}_{get_timestamp()}.png')
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
         print(f"PDF plot for {metric} - {model_name} saved")
         plt.close()
     
@@ -276,7 +285,8 @@ class MonteCarloSimulation:
         results = self.simulation_results[model_name]
         values = results[metric]
         
-        metric_label = metric.replace('_scores', '').upper()
+        metric_label = format_metric_name(metric)
+        metric_clean = metric.replace('_scores', '').lower()
         
         # Sort values for CDF
         sorted_values = np.sort(values)
@@ -284,25 +294,25 @@ class MonteCarloSimulation:
         
         plt.figure(figsize=(10, 6))
         
-        # Plot CDF
-        plt.plot(sorted_values, cdf, linewidth=2, color='purple')
-        plt.axvline(x=results[f'{metric_label.lower()}_mean'], color='r', linestyle='--', lw=2,
-                   label=f'Mean: {results[f"{metric_label.lower()}_mean"]:.4f}')
+        # Plot CDF with linewidth=3
+        plt.plot(sorted_values, cdf, linewidth=3, color='purple')
+        plt.axvline(x=results[f'{metric_clean}_mean'], color='r', linestyle='--', lw=2,
+                   label=f'Mean: {results[f"{metric_clean}_mean"]:.4f}')
         plt.axvline(x=np.median(values), color='orange', linestyle='--', lw=2,
                    label=f'Median: {np.median(values):.4f}')
         
-        plt.xlabel(metric_label, fontsize=12)
-        plt.ylabel('Cumulative Probability', fontsize=12)
-        plt.title(f'CDF of {metric_label} - {model_name}', fontsize=14, fontweight='bold')
-        plt.legend(fontsize=10)
-        plt.grid(True, alpha=0.3)
+        plt.xlabel(metric_label, fontsize=16)
+        plt.ylabel('Cumulative Probability', fontsize=16)
+        plt.title(f'CDF of {metric_label} - {model_name}', fontsize=20, fontweight='bold', pad=15)
+        plt.legend(fontsize=13)
+        plt.grid(True, linestyle='--', alpha=0.5)
         
         plt.tight_layout()
         
         # Save plot
         output_path = os.path.join(self.output_dir, 'graphs',
                                  f'monte_carlo_cdf_{metric}_{model_name}_{get_timestamp()}.png')
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
         print(f"CDF plot for {metric} - {model_name} saved")
         plt.close()
     
@@ -407,7 +417,39 @@ class MonteCarloSimulation:
 
 
 if __name__ == "__main__":
-    # Example usage
-    print("Monte Carlo Simulation Module")
-    print("This module provides Monte Carlo simulation functionality.")
-    print("Import and use the MonteCarloSimulation class in your main script.")
+    from src.data_preprocessing import DataPreprocessor
+    from src.utils import load_model
+    
+    data_path = 'data/dataset.csv'
+    if os.path.exists(data_path):
+        print(f"Loading dataset and running preprocessing pipeline...")
+        preprocessor = DataPreprocessor(data_path=data_path, target_column='Compressive_Strength_MPa')
+        preprocessor.load_data()
+        preprocessor.clean_data()
+        preprocessor.separate_features_target()
+        X_scaled = preprocessor.scale_features(scaling_method='standard')
+        y = preprocessor.y.values
+        
+        # Load trained models
+        models = {}
+        model_paths = {
+            'Random Forest': 'models/random_forest.pkl',
+            'SVR': 'models/svr.pkl',
+            'XGBoost': 'models/xgboost.pkl'
+        }
+        for name, path in model_paths.items():
+            if os.path.exists(path):
+                models[name] = load_model(path)
+            else:
+                print(f"WARNING: Model {name} not found at {path}")
+                
+        if models:
+            sim = MonteCarloSimulation(X_scaled, y, models, n_simulations=100, test_size=0.3)
+            sim.run_all_simulations()
+            sim.plot_all_distributions()
+            sim.generate_report()
+            print("Monte Carlo Simulation completed!")
+        else:
+            print("Error: No models loaded. Please train models first.")
+    else:
+        print(f"Error: Dataset not found at {data_path}")

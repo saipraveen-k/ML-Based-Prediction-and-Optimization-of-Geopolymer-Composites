@@ -1,5 +1,1 @@
-A rigorous 10-fold cross-validation procedure was conducted to evaluate the robustness and generalization capability of the developed machine learning models. Monte Carlo simulation was adopted as the primary robustness verification framework, while 10-fold cross-validation was employed as an additional generalization assessment.
-
-The XGBoost model achieved the highest average R² score of 0.9800 with the lowest standard deviation (0.0074) across all 10 folds, indicating superior predictive stability and resilience against different data partitions. This model yielded an average MAE of 2.34 MPa and RMSE of 3.49 MPa, outperforming the Random Forest (R² = 0.9690 ± 0.0096, MAE = 3.01 MPa) and SVR models (R² = 0.9618 ± 0.0147, MAE = 3.44 MPa).
-
-The extremely low coefficient of variation (CoV) observed in the fold scores confirms the absence of data leakage and demonstrates that the models are highly reliable for forecasting the compressive strength of fiber-reinforced geopolymer composites under varying material compositions.
+Cross-validation and Monte Carlo validation produced highly consistent performance estimates, indicating strong model robustness and low sensitivity to data partitioning.

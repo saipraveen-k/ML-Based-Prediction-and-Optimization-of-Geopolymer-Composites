@@ -16,12 +16,19 @@ warnings.filterwarnings('ignore')
 
 # Set style for better visualizations
 sns.set_style("whitegrid")
-plt.rcParams['figure.figsize'] = (12, 8)
-plt.rcParams['font.size'] = 10
+plt.rcParams.update({
+    'font.size': 14,
+    'axes.titlesize': 20,
+    'axes.labelsize': 16,
+    'xtick.labelsize': 13,
+    'ytick.labelsize': 13,
+    'legend.fontsize': 13,
+    'figure.titlesize': 22
+})
 
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from src.utils import print_section, print_separator, create_directory, get_timestamp, save_dataframe
+from src.utils import print_section, print_separator, create_directory, get_timestamp, save_dataframe, format_feature_name, format_metric_name
 
 
 class ModelEvaluator:
@@ -168,33 +175,36 @@ class ModelEvaluator:
             y_true = results['y_true']
             y_pred = results['y_pred']
             
-            plt.figure(figsize=(10, 8))
+            plt.figure(figsize=(8, 8))
             
             # Scatter plot
-            plt.scatter(y_true, y_pred, alpha=0.6, s=50, edgecolor='k', color='steelblue')
+            plt.scatter(y_true, y_pred, alpha=0.7, s=100, edgecolor='k', color='steelblue')
             
             # Perfect prediction line
             min_val = min(y_true.min(), y_pred.min())
             max_val = max(y_true.max(), y_pred.max())
-            plt.plot([min_val, max_val], [min_val, max_val], 'r--', lw=2, label='Perfect Prediction')
+            plt.plot([min_val, max_val], [min_val, max_val], 'r--', lw=3, label='y = x (Perfect Prediction)')
             
-            plt.xlabel('Actual Compressive Strength', fontsize=12)
-            plt.ylabel('Predicted Compressive Strength', fontsize=12)
-            plt.title(f'Actual vs Predicted - {name}', fontsize=14, fontweight='bold')
-            plt.legend(fontsize=10)
-            plt.grid(True, alpha=0.3)
+            plt.xlabel('Actual Compressive Strength (MPa)', fontsize=16)
+            plt.ylabel('Predicted Compressive Strength (MPa)', fontsize=16)
+            plt.title(f'Actual vs Predicted Compressive Strength - {name}', fontsize=20, fontweight='bold', pad=15)
+            plt.legend(fontsize=13, loc='lower right')
+            plt.grid(True, linestyle='--', alpha=0.5)
             
-            # Add R² score
+            # Add stats (R², RMSE, MAE)
             r2 = results['metrics']['R²']
-            plt.text(0.05, 0.95, f'R² = {r2:.4f}', 
-                    transform=plt.gca().transAxes, fontsize=12,
-                    verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+            rmse = results['metrics']['RMSE']
+            mae = results['metrics']['MAE']
+            stats_text = f"R² = {r2:.4f}\nRMSE = {rmse:.2f} MPa\nMAE = {mae:.2f} MPa"
+            plt.text(0.05, 0.95, stats_text, 
+                    transform=plt.gca().transAxes, fontsize=13,
+                    verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.8, edgecolor='gray'))
             
             plt.tight_layout()
             
             # Save plot
             output_path = os.path.join(self.output_dir, 'graphs', f'actual_vs_predicted_{name}_{get_timestamp()}.png')
-            plt.savefig(output_path, dpi=300, bbox_inches='tight')
+            plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
             print(f"Actual vs Predicted plot for {name} saved")
             plt.close()
     
@@ -227,29 +237,21 @@ class ModelEvaluator:
             y_pred = results['y_pred']
             residuals = y_true - y_pred
             
-            fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+            plt.figure(figsize=(10, 6))
             
             # Residual vs Predicted
-            axes[0].scatter(y_pred, residuals, alpha=0.6, s=50, edgecolor='k', color='steelblue')
-            axes[0].axhline(y=0, color='r', linestyle='--', lw=2)
-            axes[0].set_xlabel('Predicted Values', fontsize=12)
-            axes[0].set_ylabel('Residuals', fontsize=12)
-            axes[0].set_title(f'Residual Plot - {name}', fontsize=12, fontweight='bold')
-            axes[0].grid(True, alpha=0.3)
-            
-            # Histogram of residuals
-            axes[1].hist(residuals, bins=30, edgecolor='k', color='lightcoral', alpha=0.7)
-            axes[1].axvline(x=0, color='r', linestyle='--', lw=2)
-            axes[1].set_xlabel('Residuals', fontsize=12)
-            axes[1].set_ylabel('Frequency', fontsize=12)
-            axes[1].set_title(f'Residual Distribution - {name}', fontsize=12, fontweight='bold')
-            axes[1].grid(True, alpha=0.3, axis='y')
+            plt.scatter(y_pred, residuals, alpha=0.7, s=80, edgecolor='k', color='steelblue')
+            plt.axhline(y=0, color='red', linestyle='--', lw=3)
+            plt.xlabel('Predicted Compressive Strength (MPa)', fontsize=16)
+            plt.ylabel('Residuals (MPa)', fontsize=16)
+            plt.title(f'Residuals vs Predicted Compressive Strength - {name}', fontsize=20, fontweight='bold', pad=15)
+            plt.grid(True, linestyle='--', alpha=0.5)
             
             plt.tight_layout()
             
             # Save plot
             output_path = os.path.join(self.output_dir, 'graphs', f'residuals_{name}_{get_timestamp()}.png')
-            plt.savefig(output_path, dpi=300, bbox_inches='tight')
+            plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
             print(f"Residual plot for {name} saved")
             plt.close()
     
@@ -285,21 +287,21 @@ class ModelEvaluator:
             plt.figure(figsize=(10, 6))
             
             # Histogram with KDE
-            sns.histplot(errors, kde=True, bins=30, color='darkgreen', alpha=0.7)
-            plt.axvline(x=0, color='r', linestyle='--', lw=2)
+            sns.histplot(errors, kde=True, bins=30, color='darkgreen', alpha=0.7, edgecolor='black')
+            plt.axvline(x=0, color='red', linestyle='--', lw=2)
             plt.axvline(x=errors.mean(), color='orange', linestyle='--', lw=2, label=f'Mean Error: {errors.mean():.4f}')
             
-            plt.xlabel('Prediction Error', fontsize=12)
-            plt.ylabel('Frequency', fontsize=12)
-            plt.title(f'Error Distribution - {name}', fontsize=14, fontweight='bold')
-            plt.legend(fontsize=10)
-            plt.grid(True, alpha=0.3, axis='y')
+            plt.xlabel('Prediction Error (MPa)', fontsize=16)
+            plt.ylabel('Frequency', fontsize=16)
+            plt.title(f'Error Distribution - {name}', fontsize=20, fontweight='bold', pad=15)
+            plt.legend(fontsize=13)
+            plt.grid(True, linestyle='--', alpha=0.5, axis='y')
             
             plt.tight_layout()
             
             # Save plot
             output_path = os.path.join(self.output_dir, 'graphs', f'error_distribution_{name}_{get_timestamp()}.png')
-            plt.savefig(output_path, dpi=300, bbox_inches='tight')
+            plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
             print(f"Error distribution plot for {name} saved")
             plt.close()
     
@@ -358,24 +360,27 @@ class ModelEvaluator:
         
         for idx, (metric, color) in enumerate(zip(metrics, colors)):
             ax = axes[idx]
-            bars = ax.bar(comparison_df['Model'], comparison_df[metric], color=color, alpha=0.7, edgecolor='k')
-            ax.set_ylabel(metric, fontsize=11)
-            ax.set_title(f'{metric} Comparison', fontsize=12, fontweight='bold')
-            ax.grid(True, alpha=0.3, axis='y')
+            bars = ax.bar(comparison_df['Model'], comparison_df[metric], color=color, alpha=0.75, edgecolor='k', width=0.4)
+            
+            # Format using format_metric_name helper
+            clean_metric = format_metric_name(metric)
+            ax.set_ylabel(clean_metric, fontsize=14)
+            ax.set_title(f'{clean_metric} Comparison', fontsize=16, fontweight='bold')
+            ax.grid(True, linestyle='--', alpha=0.5, axis='y')
             
             # Add value labels on bars
             for bar in bars:
                 height = bar.get_height()
-                ax.text(bar.get_x() + bar.get_width()/2., height,
-                       f'{height:.4f}', ha='center', va='bottom', fontsize=9)
+                ax.text(bar.get_x() + bar.get_width()/2., height * 1.01,
+                       f'{height:.4f}', ha='center', va='bottom', fontsize=11, fontweight='bold')
             
-            plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right')
+            plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right', fontsize=11)
         
         plt.tight_layout()
         
         # Save plot
         output_path = os.path.join(self.output_dir, 'graphs', f'model_comparison_{get_timestamp()}.png')
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.savefig(output_path, dpi=600, bbox_inches='tight', facecolor='white')
         print(f"Model comparison plot saved to: {output_path}")
         plt.close()
     
@@ -464,7 +469,35 @@ class ModelEvaluator:
 
 
 if __name__ == "__main__":
-    # Example usage
-    print("Model Evaluation Module")
-    print("This module provides model evaluation functionality.")
-    print("Import and use the ModelEvaluator class in your main script.")
+    from src.data_preprocessing import DataPreprocessor
+    from src.utils import load_model
+    
+    data_path = 'data/dataset.csv'
+    if os.path.exists(data_path):
+        print(f"Loading dataset and running preprocessing pipeline...")
+        preprocessor = DataPreprocessor(data_path=data_path, target_column='Compressive_Strength_MPa')
+        X_train, X_test, y_train, y_test = preprocessor.preprocess_pipeline(test_size=0.3, random_state=42)
+        
+        # Load trained models
+        models = {}
+        model_paths = {
+            'Random Forest': 'models/random_forest.pkl',
+            'SVR': 'models/svr.pkl',
+            'XGBoost': 'models/xgboost.pkl'
+        }
+        for name, path in model_paths.items():
+            if os.path.exists(path):
+                models[name] = load_model(path)
+            else:
+                print(f"WARNING: Model {name} not found at {path}")
+                
+        if models:
+            evaluator = ModelEvaluator()
+            evaluator.evaluate_all_models(models, X_test, y_test)
+            evaluator.generate_all_plots()
+            evaluator.generate_evaluation_report()
+            print("Model evaluation complete!")
+        else:
+            print("Error: No models loaded. Please train models first.")
+    else:
+        print(f"Error: Dataset not found at {data_path}")
