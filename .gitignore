@@ -1,0 +1,17 @@
+# Environment & Secrets
+.env
+.streamlit/secrets.toml
+
+# Python bytecode & cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Temporary & test scratch directory
+scratch/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
