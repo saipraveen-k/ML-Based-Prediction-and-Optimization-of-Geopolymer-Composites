@@ -12,6 +12,15 @@ import numpy as np
 import joblib
 import os
 import sys
+import warnings
+
+# Suppress minor version unpickling and XGBoost warnings
+warnings.filterwarnings('ignore', category=UserWarning)
+try:
+    from sklearn.exceptions import InconsistentVersionWarning
+    warnings.filterwarnings('ignore', category=InconsistentVersionWarning)
+except ImportError:
+    pass
 
 # Ensure project root is in sys.path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))

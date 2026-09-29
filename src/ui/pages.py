@@ -173,51 +173,44 @@ def render_prediction_studio_page(df, models, scaler, demo_mode=False):
     input_values = {}
     col_a, col_b = st.columns(2)
     
+    def _create_feature_input(feat, fallback_range):
+        clean = get_clean_label(feat)
+        default_val = float(preset_values.get(feat, FEATURE_DEFAULTS.get(feat, 0.0)))
+        min_v, max_v, step_v = FEATURE_RANGES.get(feat, fallback_range)
+        min_v = float(min(min_v, default_val))
+        max_v = float(max(max_v, default_val))
+        return st.number_input(clean, min_value=min_v, max_value=max_v, value=default_val, step=step_v, key=f"inp_{feat}")
+
     with col_a:
         # Category 01: Binder System
         st.markdown('<div class="subtle-card"><div class="card-header-sm">01 Binder System (kg/m³)</div>', unsafe_allow_html=True)
         for feat in FEATURE_CATEGORIES["01 Binder System"]:
-            clean = get_clean_label(feat)
-            default_val = float(preset_values.get(feat, FEATURE_DEFAULTS.get(feat, 0.0)))
-            min_v, max_v, step_v = FEATURE_RANGES.get(feat, (0.0, 1000.0, 1.0))
-            input_values[feat] = st.number_input(clean, min_value=min_v, max_value=max_v, value=default_val, step=step_v, key=f"inp_{feat}")
+            input_values[feat] = _create_feature_input(feat, (0.0, 2000.0, 1.0))
         st.markdown('</div>', unsafe_allow_html=True)
         
         # Category 02: Activator
         st.markdown('<div class="subtle-card"><div class="card-header-sm">02 Activator Parameters</div>', unsafe_allow_html=True)
         for feat in FEATURE_CATEGORIES["02 Activator"]:
-            clean = get_clean_label(feat)
-            default_val = float(preset_values.get(feat, FEATURE_DEFAULTS.get(feat, 0.0)))
-            min_v, max_v, step_v = FEATURE_RANGES.get(feat, (0.0, 500.0, 1.0))
-            input_values[feat] = st.number_input(clean, min_value=min_v, max_value=max_v, value=default_val, step=step_v, key=f"inp_{feat}")
+            input_values[feat] = _create_feature_input(feat, (0.0, 500.0, 1.0))
         st.markdown('</div>', unsafe_allow_html=True)
 
     with col_b:
         # Category 03: Mix Design
         st.markdown('<div class="subtle-card"><div class="card-header-sm">03 Mix Design & Aggregates</div>', unsafe_allow_html=True)
         for feat in FEATURE_CATEGORIES["03 Mix Design"]:
-            clean = get_clean_label(feat)
-            default_val = float(preset_values.get(feat, FEATURE_DEFAULTS.get(feat, 0.0)))
-            min_v, max_v, step_v = FEATURE_RANGES.get(feat, (0.0, 1000.0, 1.0))
-            input_values[feat] = st.number_input(clean, min_value=min_v, max_value=max_v, value=default_val, step=step_v, key=f"inp_{feat}")
+            input_values[feat] = _create_feature_input(feat, (0.0, 2500.0, 1.0))
         st.markdown('</div>', unsafe_allow_html=True)
 
         # Category 04: Reinforcement
         st.markdown('<div class="subtle-card"><div class="card-header-sm">04 Fiber Reinforcement</div>', unsafe_allow_html=True)
         for feat in FEATURE_CATEGORIES["04 Reinforcement"]:
-            clean = get_clean_label(feat)
-            default_val = float(preset_values.get(feat, FEATURE_DEFAULTS.get(feat, 0.0)))
-            min_v, max_v, step_v = FEATURE_RANGES.get(feat, (0.0, 50.0, 0.1))
-            input_values[feat] = st.number_input(clean, min_value=min_v, max_value=max_v, value=default_val, step=step_v, key=f"inp_{feat}")
+            input_values[feat] = _create_feature_input(feat, (0.0, 50.0, 0.1))
         st.markdown('</div>', unsafe_allow_html=True)
 
         # Category 05: Curing
         st.markdown('<div class="subtle-card"><div class="card-header-sm">05 Curing Conditions</div>', unsafe_allow_html=True)
         for feat in FEATURE_CATEGORIES["05 Curing"]:
-            clean = get_clean_label(feat)
-            default_val = float(preset_values.get(feat, FEATURE_DEFAULTS.get(feat, 0.0)))
-            min_v, max_v, step_v = FEATURE_RANGES.get(feat, (0.0, 200.0, 1.0))
-            input_values[feat] = st.number_input(clean, min_value=min_v, max_value=max_v, value=default_val, step=step_v, key=f"inp_{feat}")
+            input_values[feat] = _create_feature_input(feat, (0.0, 365.0, 1.0))
         st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("<div style='margin-top: 1rem;'></div>", unsafe_allow_html=True)

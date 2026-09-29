@@ -9,7 +9,16 @@ import pickle
 import joblib
 import pandas as pd
 import numpy as np
+import warnings
 from datetime import datetime
+
+# Suppress minor version unpickling warnings
+warnings.filterwarnings('ignore', category=UserWarning)
+try:
+    from sklearn.exceptions import InconsistentVersionWarning
+    warnings.filterwarnings('ignore', category=InconsistentVersionWarning)
+except ImportError:
+    pass
 
 
 def create_directory(directory_path):

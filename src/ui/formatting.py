@@ -84,27 +84,27 @@ FEATURE_DEFAULTS = {
 }
 
 FEATURE_RANGES = {
-    'Cement_kg_m3': (0.0, 1000.0, 10.0),
-    'Fly_Ash_kg_m3': (0.0, 600.0, 10.0),
-    'Silica_Fume_kg_m3': (0.0, 300.0, 5.0),
-    'Metakaolin_kg_m3': (0.0, 300.0, 5.0),
-    'GGBS_kg_m3': (0.0, 600.0, 10.0),
-    'RHA_kg_m3': (0.0, 200.0, 5.0),
-    'POFA_kg_m3': (0.0, 200.0, 5.0),
-    'Fine_Sand_kg_m3': (0.0, 1200.0, 10.0),
-    'Water_kg_m3': (0.0, 400.0, 5.0),
-    'Extra_Water_kg_m3': (0.0, 150.0, 5.0),
-    'Water_Binder_Ratio': (0.05, 1.0, 0.01),
-    'Na2SiO3_Content_kg_m3': (0.0, 300.0, 5.0),
-    'NaOH_Content_kg_m3': (0.0, 200.0, 5.0),
-    'KOH_Content_kg_m3': (0.0, 100.0, 1.0),
-    'Activator_Molarity_M': (0.0, 24.0, 0.5),
-    'Superplasticizer_kg_m3': (0.0, 60.0, 0.5),
-    'Polypropylene_Fiber_Content_%': (0.0, 5.0, 0.05),
-    'PP_Fiber_kg_m3': (0.0, 30.0, 0.5),
-    'Fiber_Length_mm': (0.0, 60.0, 1.0),
-    'Curing_Temperature_C': (10.0, 120.0, 1.0),
-    'Curing_Duration_days': (1.0, 180.0, 1.0)
+    'Cement_kg_m3': (0.0, 2000.0, 10.0),
+    'Fly_Ash_kg_m3': (0.0, 1500.0, 10.0),
+    'Silica_Fume_kg_m3': (0.0, 500.0, 5.0),
+    'Metakaolin_kg_m3': (0.0, 1500.0, 5.0),
+    'GGBS_kg_m3': (0.0, 1500.0, 10.0),
+    'RHA_kg_m3': (0.0, 500.0, 5.0),
+    'POFA_kg_m3': (0.0, 500.0, 5.0),
+    'Fine_Sand_kg_m3': (0.0, 2500.0, 10.0),
+    'Water_kg_m3': (0.0, 800.0, 5.0),
+    'Extra_Water_kg_m3': (0.0, 300.0, 5.0),
+    'Water_Binder_Ratio': (0.0, 2.0, 0.01),
+    'Na2SiO3_Content_kg_m3': (0.0, 500.0, 5.0),
+    'NaOH_Content_kg_m3': (0.0, 300.0, 5.0),
+    'KOH_Content_kg_m3': (0.0, 300.0, 1.0),
+    'Activator_Molarity_M': (0.0, 30.0, 0.5),
+    'Superplasticizer_kg_m3': (0.0, 100.0, 0.5),
+    'Polypropylene_Fiber_Content_%': (0.0, 10.0, 0.05),
+    'PP_Fiber_kg_m3': (0.0, 50.0, 0.5),
+    'Fiber_Length_mm': (0.0, 100.0, 1.0),
+    'Curing_Temperature_C': (0.0, 150.0, 1.0),
+    'Curing_Duration_days': (0.0, 365.0, 1.0)
 }
 
 
